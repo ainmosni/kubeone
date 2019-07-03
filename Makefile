@@ -36,6 +36,10 @@ install:
 kubeone: build
 build: dist/kubeone
 
+.PHONY: docker
+docker: dist/kubeone
+	docker build -t quay.io/kubermatic/kubeone:$(GITTAG) -f build/docker/Dockerfile .
+
 .PHONY: lint
 lint:
 	@golangci-lint --version
