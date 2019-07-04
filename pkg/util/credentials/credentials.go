@@ -42,6 +42,7 @@ const (
 	OpenStackDomainName     = "OS_DOMAIN_NAME"
 	OpenStackPassword       = "OS_PASSWORD"
 	OpenStackRegionName     = "OS_REGION_NAME"
+	OpenStackTenantID       = "OS_TENANT_ID"
 	OpenStackTenantName     = "OS_TENANT_NAME"
 	OpenStackUserName       = "OS_USER_NAME"
 	PacketAPIKey            = "PACKET_API_KEY"
@@ -101,6 +102,7 @@ func ProviderCredentials(p kubeone.CloudProviderName) (map[string]string, error)
 			{Name: "OS_PASSWORD"},
 			{Name: "OS_DOMAIN_NAME"},
 			{Name: "OS_REGION_NAME"},
+			{Name: "OS_TENANT_ID"},
 			{Name: "OS_TENANT_NAME"},
 		})
 	case kubeone.CloudProviderNameHetzner:
