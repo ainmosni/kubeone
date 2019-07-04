@@ -16,6 +16,9 @@ export GOPATH?=$(shell go env GOPATH)
 export CGO_ENABLED=0
 export TFJSON?=
 export KUBERNETES_VERSION=1.14.1
+export GOPROXY=https://proxy.golang.org
+export GO111MODULE=on
+
 BUILD_DATE=$(shell if hash gdate 2>/dev/null; then gdate --rfc-3339=seconds | sed 's/ /T/'; else date --rfc-3339=seconds | sed 's/ /T/'; fi)
 BUILD_IMAGE?=golang:1.12.5
 GITCOMMIT=$(shell git log -1 --pretty=format:"%H")
@@ -36,6 +39,14 @@ install:
 kubeone: build
 build: dist/kubeone
 
+.PHONY: check-dependencies
+check-dependencies:
+	go mod verify
+
+.PHONY: dep
+dep:
+	go mod download
+
 .PHONY: lint
 lint:
 	@golangci-lint --version
@@ -45,17 +56,13 @@ lint:
 test:
 	CGO_ENABLED=1 go test -race ./...
 
-.PHONY: dep
-dep:
-	dep ensure -v
-
 .PHONY: licence-check
 licence-check:
 	wwhrd check
 
-.PHONY: check-dependencies
-check-dependencies:
-	dep check
+.PHONY: vendor
+vendor:
+	go mod vendor
 
 docker-make-install:
 	docker run -it --rm \
@@ -66,11 +73,11 @@ docker-make-install:
 		make install
 
 .PHONY: e2e_test
-e2e_test: build lint test dep
+e2e_test: build lint test
 	./hack/run_ci_e2e_test.sh
 
-dist/kubeone: $(shell find . -name '*.go')
-	go build -ldflags='$(GOLDFLAGS)' -v -o $@ .
+dist/kubeone: vendor $(shell find . -name '*.go')
+	go build -mod readonly -ldflags='$(GOLDFLAGS)' -v -o $@ .
 
 $(CREATE_TARGETS): kubeone
 	$(eval PROVIDERNAME := $(@:-env=))
